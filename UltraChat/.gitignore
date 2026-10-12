@@ -1,0 +1,48 @@
+# Environment variables & secrets (CRITICAL)
+.env
+.env.local
+*.env
+
+# Local Vector Database & Persistent Storage
+qdrant_storage/
+*.db
+*.sqlite3
+
+# Large dataset files & embeddings (>90MB)
+*.npy
+*.npz
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# IDEs & Editor configurations
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+
+# Logs & temp files
+*.log
+logs/
+tmp/
+temp/
