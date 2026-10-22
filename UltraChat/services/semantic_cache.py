@@ -89,13 +89,14 @@ class SemanticCacheService:
         try:
             search_results = self.client.query_points(
                 collection_name=self.collection_name,
-                query_vector=query_vector,
+                query=query_vector,
                 limit=1,
                 score_threshold=effective_threshold
             )
 
-            if search_results:
-                top_hit = search_results[0]
+            points = search_results.points if hasattr(search_results, "points") else search_results
+            if points and len(points) > 0:
+                top_hit = points[0]
                 logger.info(f"Semantic Cache Hit! Similarity: {top_hit.score:.4f} >= threshold ({effective_threshold})")
                 return top_hit.payload, float(top_hit.score)
 
