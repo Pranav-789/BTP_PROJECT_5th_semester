@@ -387,9 +387,9 @@ During the research development, two independent benchmark datasets were investi
 
 | Concept | Mathematical Equation | Implementation Reference |
 | :--- | :--- | :--- |
-| **Prompt Embedding** | $\mathbf{v} = f_{\text{MiniLM}}(\text{prompt}) \in \mathbb{R}^{384}, \quad \|\mathbf{v}\|_2 = 1$ | [`services/embedding_service.py`](file:///c:/Users/ASUS/OneDrive/Desktop/coding/Z_Malicious/BTP_ML_26/UltraChat/services/embedding_service.py#L74-L76) |
-| **Cosine Cache Match** | $S(\mathbf{q}, \mathbf{c}) = \mathbf{q} \cdot \mathbf{c} \ge \tau = 0.92$ | [`services/semantic_cache.py`](file:///c:/Users/ASUS/OneDrive/Desktop/coding/Z_Malicious/BTP_ML_26/UltraChat/services/semantic_cache.py#L28) |
-| **Token Log Scaling** | $y_{\text{tokens}} = \ln(1 + \text{tokens}), \quad \widehat{\text{tokens}} = \exp(\hat{y}) - 1$ | [`core/dl_loader.py`](file:///c:/Users/ASUS/OneDrive/Desktop/coding/Z_Malicious/BTP_ML_26/UltraChat/core/dl_loader.py#L122-L123) |
-| **Huber Loss ($\delta=1$)** | $\mathcal{L}_{\delta}(a) = \frac{1}{2}a^2 \text{ if } \|a\| \le 1 \text{ else } \|a\| - \frac{1}{2}$ | [`extracted_code.py`](file:///c:/Users/ASUS/OneDrive/Desktop/coding/Z_Malicious/BTP_ML_26/UltraChat/extracted_code.py#L341) |
-| **Balanced Utility** | $U(m) = 0.4 O_m + 0.3 I_m + 0.2 H_m - 0.05 C_m$ | [`services/agent_1_router.py`](file:///c:/Users/ASUS/OneDrive/Desktop/coding/Z_Malicious/BTP_ML_26/UltraChat/services/agent_1_router.py#L94-L101) |
+| **Prompt Embedding** | $\mathbf{v} = f_{\text{MiniLM}}(\text{prompt}) \in \mathbb{R}^{384}, \quad \|\mathbf{v}\|_2 = 1$ | [`services/embedding_service.py`] |
+| **Cosine Cache Match** | $S(\mathbf{q}, \mathbf{c}) = \mathbf{q} \cdot \mathbf{c} \ge \tau = 0.92$ | [`services/semantic_cache.py`] |
+| **Token Log Scaling** | $y_{\text{tokens}} = \ln(1 + \text{tokens}), \quad \widehat{\text{tokens}} = \exp(\hat{y}) - 1$ | [`core/dl_loader.py`] |
+| **Huber Loss ($\delta=1$)** | $\mathcal{L}_{\delta}(a) = \frac{1}{2}a^2 \text{ if } \|a\| \le 1 \text{ else } \|a\| - \frac{1}{2}$ | [`extracted_code.py`] |
+| **Balanced Utility** | $U(m) = 0.4 O_m + 0.3 I_m + 0.2 H_m - 0.05 C_m$ | [`services/agent_1_router.py`] |
 | **Repetition Ratio** | $\rho = \|\mathcal{W}_{\text{unique}}\| / \|\mathcal{W}_{\text{total}}\| \ge 0.20$ | [`services/agent_2_evaluator.py`]
