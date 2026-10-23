@@ -169,7 +169,7 @@ Emphasize why Agent 2 makes the system production-grade:
 
 ## 3. Live Demonstration Playbook (Step-by-Step)
 
-During your presentation, open the Streamlit interface ([`client.py`](file:///c:/Users/ASUS/OneDrive/Desktop/coding/Z_Malicious/BTP_ML_26/UltraChat/client.py)) alongside the FastAPI backend. Execute these 4 concrete test cases:
+During your presentation, open the Streamlit interface ([`client.py`]) alongside the FastAPI backend. Execute these 4 concrete test cases:
 
 ### Demo 1: First-Turn Cold Query (Cache Miss $\rightarrow$ Intelligent Routing)
 - **Prompt**: *"Write a Python asyncio program that concurrently downloads three web pages with timeout and error handling."*
