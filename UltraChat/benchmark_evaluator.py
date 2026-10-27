@@ -17,12 +17,16 @@ Computes:
 import os
 import sys
 import json
+import csv
 import time
 import zipfile
 import tempfile
 from typing import Dict, List, Any
 import numpy as np
-import tensorflow as tf
+try:
+    import tensorflow as tf
+except ImportError:
+    tf = None
 
 # Configure UTF-8 for console output
 try:
@@ -880,6 +884,13 @@ def run_benchmark_evaluation():
         json.dump(benchmark_payload, f, indent=2)
     print(f"\nSaved raw JSON results to '{json_path}'")
 
+    # Save to CSV
+    csv_paths = [
+        os.path.join(current_dir, "benchmark_evaluation_results.csv"),
+        os.path.join(workspace_root, "docs", "BENCHMARK_EVALUATION_DATASET.csv")
+    ]
+    save_benchmark_csv(benchmark_payload, csv_paths)
+
     # Generate Markdown Report
     report_path = os.path.join(workspace_root, "docs", "BENCHMARK_EVALUATION_RESULTS.md")
     generate_markdown_report(benchmark_payload, report_path)
@@ -1078,6 +1089,110 @@ def generate_markdown_report(data: Dict[str, Any], output_path: str):
 
     with open(output_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
+
+
+def save_benchmark_csv(data: Dict[str, Any], output_paths: List[str] = None):
+    """Exports detailed benchmark evaluation records to CSV format."""
+    records = data.get("detailed_query_records", [])
+    if not records:
+        print("[WARNING] No detailed_query_records found in benchmark payload to export to CSV.")
+        return
+
+    fieldnames = [
+        "query_id",
+        "benchmark",
+        "category",
+        "input_prompt",
+        "selected_model_balanced",
+        "dispatched_tier",
+        "router_utility_score",
+        "output_quality_score",
+        "instruction_following_score",
+        "helpfulness_score",
+        "truthfulness_score",
+        "predicted_output_tokens",
+        "cost_factor",
+        "projected_cost_per_query_usd",
+        "gpt4_baseline_quality",
+        "quality_retention_pct",
+        "cost_savings_vs_gpt4_pct",
+        "selected_model_best_quality",
+        "best_quality_score",
+        "selected_model_cost_optimized",
+        "cost_optimized_quality_score",
+        "selected_model_instruction_focused",
+        "gpt35_baseline_quality",
+        "llama2_7b_baseline_quality",
+        "evaluation_verdict"
+    ]
+
+    rows = []
+    for r in records:
+        b_strat = r.get("strategies", {}).get("balanced", {})
+        bq_strat = r.get("strategies", {}).get("best_quality", {})
+        co_strat = r.get("strategies", {}).get("cost_optimized", {})
+        if_strat = r.get("strategies", {}).get("instruction_focused", {})
+        baselines = r.get("baselines", {})
+
+        gpt4_q = baselines.get("gpt_4", {}).get("overall", 8.0)
+        overall_q = b_strat.get("overall_quality", 0.0)
+        q_ret = (overall_q / gpt4_q) * 100.0 if gpt4_q else 100.0
+        cost_factor = b_strat.get("cost_factor", 0.0)
+        cost_sav = (1.0 - cost_factor) * 100.0
+        cost_per_query = cost_factor * 0.030
+
+        tier = b_strat.get("tier", "")
+        if "Tier 3" in tier:
+            verdict = "Tier 3 Frontier Dispatched (High Complexity / Precision Task)"
+        elif "Tier 2" in tier:
+            verdict = "Tier 2 Mid-Range Dispatched (Intermediate Technical Depth)"
+        else:
+            verdict = "Tier 1 Lightweight Dispatched (Frugal Routing - 80% Cost Savings)"
+
+        rows.append({
+            "query_id": r.get("id", ""),
+            "benchmark": r.get("benchmark", ""),
+            "category": r.get("category", ""),
+            "input_prompt": r.get("prompt", ""),
+            "selected_model_balanced": b_strat.get("selected_model", ""),
+            "dispatched_tier": b_strat.get("tier", ""),
+            "router_utility_score": round(b_strat.get("utility", 0.0), 4),
+            "output_quality_score": round(b_strat.get("overall_quality", 0.0), 4),
+            "instruction_following_score": round(b_strat.get("instruction_score", 0.0), 4),
+            "helpfulness_score": round(b_strat.get("helpfulness", 0.0), 4),
+            "truthfulness_score": round(b_strat.get("truthfulness", 0.0), 4),
+            "predicted_output_tokens": round(b_strat.get("predicted_tokens", 0.0), 1),
+            "cost_factor": round(cost_factor, 3),
+            "projected_cost_per_query_usd": f"${cost_per_query:.5f}",
+            "gpt4_baseline_quality": round(gpt4_q, 4),
+            "quality_retention_pct": f"{q_ret:.2f}%",
+            "cost_savings_vs_gpt4_pct": f"{cost_sav:.1f}%",
+            "selected_model_best_quality": bq_strat.get("selected_model", ""),
+            "best_quality_score": round(bq_strat.get("overall_quality", 0.0), 4),
+            "selected_model_cost_optimized": co_strat.get("selected_model", ""),
+            "cost_optimized_quality_score": round(co_strat.get("overall_quality", 0.0), 4),
+            "selected_model_instruction_focused": if_strat.get("selected_model", ""),
+            "gpt35_baseline_quality": round(baselines.get("gpt_3.5_turbo", {}).get("overall", 0.0), 4),
+            "llama2_7b_baseline_quality": round(baselines.get("llama_2_7b_chat", {}).get("overall", 0.0), 4),
+            "evaluation_verdict": verdict
+        })
+
+    if output_paths is None:
+        output_paths = [os.path.join(current_dir, "benchmark_evaluation_results.csv")]
+
+    for p in output_paths:
+        p_abs = os.path.abspath(p)
+        try:
+            os.makedirs(os.path.dirname(p_abs), exist_ok=True)
+            with open(p_abs, "w", newline="", encoding="utf-8") as f:
+                writer = csv.DictWriter(f, fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerows(rows)
+            print(f"Saved benchmark CSV results to '{p_abs}'")
+        except PermissionError:
+            print(f"[WARNING] Could not save to '{p_abs}': File is locked (likely open in Microsoft Excel or another viewer). Close it and re-run to update.")
+        except Exception as e:
+            print(f"[ERROR] Failed to save CSV to '{p_abs}': {e}")
 
 
 if __name__ == "__main__":
